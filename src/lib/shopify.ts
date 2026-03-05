@@ -1,54 +1,65 @@
 export interface Product {
-  id: string
-  handle: string
-  title: string
-  image: string
-  price: number
+  id: string;
+  title: string;
+  handle: string;
+  description: string;
+  price: string;
+  image: string;
+}
+
+const domain = process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN;
+const token = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+
+async function storefront(query: string, variables: any = {}) {
+  if (!domain || !token) {
+    throw new Error('Missing Shopify domain or access token');
+  }
+  const url = `https://${domain}/api/2023-07/graphql.json`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Storefront-Access-Token': token as string,
+    },
+    body: JSON.stringify({ query, variables }),
+    next: { revalidate: 60 },
+  });
+  const json = await res.json();
+  if (json.errors) {
+    throw new Error(JSON.stringify(json.errors));
+  }
+  return json.data;
 }
 
 /**
- * Fetch products from a Shopify collection using the Storefront API.
- *
- * The collection handle must correspond to a collection defined in Shopify.
- * This helper sends a GraphQL query to the Shopify Storefront API and
- * returns an array of simplified product objects containing the id,
- * handle, title, first image URL and the first variant price.
+ * Fetch products from a given collection handle.
+ * @param collectionHandle The Shopify collection handle (e.g. 'new-arrivals').
  */
-export async function getProductsFromCollection(
-  handle: string,
-  first = 3
-): Promise<Product[]> {
-  const domain = process.env.SHOPIFY_STORE_DOMAIN
-  const token = process.env.SHOPIFY_STOREFRONT_TOKEN
-  const apiVersion = process.env.SHOPIFY_API_VERSION || '2024-07'
-  if (!domain || !token) {
-    console.warn('Shopify environment variables are not set')
-    return []
-  }
-  const url = `https://${domain}/api/${apiVersion}/graphql.json`
-  const query = /* GraphQL */ `
-    query GetProducts($handle: String!, $first: Int!) {
+export async function getProductsByCollection(collectionHandle: string): Promise<Product[]> {
+  const query = `
+    query getProducts($handle: String!) {
       collectionByHandle(handle: $handle) {
-        products(first: $first) {
+        id
+        title
+        products(first: 20) {
           edges {
             node {
               id
-              handle
               title
+              handle
+              description
               images(first: 1) {
                 edges {
                   node {
-                    src
+                    url
+                    altText
                   }
                 }
               }
-              variants(first: 1) {
-                edges {
-                  node {
-                    price {
-                      amount
-                    }
-                  }
+              priceRangeV2 {
+                minVariantPrice {
+                  amount
+                  currencyCode
                 }
               }
             }
@@ -56,37 +67,65 @@ export async function getProductsFromCollection(
         }
       }
     }
-  `
-  const variables = { handle, first }
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': token ?? ''
-    },
-    body: JSON.stringify({ query, variables }),
-    // revalidate after 60 seconds when using server components
-    next: { revalidate: 60 }
-  })
-  if (!res.ok) {
-    console.error('Failed to fetch products from Shopify:', await res.text())
-    return []
-  }
-  const json = await res.json()
-  const edges =
-    json?.data?.collectionByHandle?.products?.edges ?? []
-  return edges.map((edge: any) => {
-    const node = edge.node
-    const image = node.images.edges[0]?.node.src || ''
-    const price = parseFloat(
-      node.variants.edges[0]?.node.price.amount || '0'
-    )
+  `;
+  const data = await storefront(query, { handle: collectionHandle });
+  const edges = data?.collectionByHandle?.products?.edges || [];
+  return edges.map(({ node }: any) => {
+    const imageNode = node.images?.edges?.[0]?.node;
+    const image = imageNode ? imageNode.url : '';
+    const price = `${node.priceRangeV2.minVariantPrice.amount} ${node.priceRangeV2.minVariantPrice.currencyCode}`;
     return {
       id: node.id,
-      handle: node.handle,
       title: node.title,
-      image,
+      handle: node.handle,
+      description: node.description,
       price,
-    } as Product
-  })
+      image,
+    } as Product;
+  });
+}
+
+/**
+ * Fetch a single product by its handle from Shopify. Returns null if not found.
+ * @param handle The product handle
+ */
+export async function getProductByHandle(handle: string): Promise<Product | null> {
+  const query = `
+    query getProduct($handle: String!) {
+      productByHandle(handle: $handle) {
+        id
+        title
+        handle
+        description
+        images(first: 1) {
+          edges {
+            node {
+              url
+              altText
+            }
+          }
+        }
+        priceRangeV2 {
+          minVariantPrice {
+            amount
+            currencyCode
+          }
+        }
+      }
+    }
+  `;
+  const data = await storefront(query, { handle });
+  const product = data?.productByHandle;
+  if (!product) return null;
+  const imageNode = product.images?.edges?.[0]?.node;
+  const image = imageNode ? imageNode.url : '';
+  const price = `${product.priceRangeV2.minVariantPrice.amount} ${product.priceRangeV2.minVariantPrice.currencyCode}`;
+  return {
+    id: product.id,
+    title: product.title,
+    handle: product.handle,
+    description: product.description,
+    price,
+    image,
+  } as Product;
 }
