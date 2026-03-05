@@ -6,7 +6,7 @@ import { getProductsByCollection } from '../lib/shopify';
 export default async function Page() {
   // Fetch products from the 'new-arrivals' collection. Adjust as needed.
   const products = await getProductsByCollection('new-arrivals');
-  const targetDate = process.env.NEXT_PUBLIC_CORAL_DROP_DATE || '';
+const targetDate = process.env.CORAL_DROP_DATE || '';
 
   return (
     <main>
