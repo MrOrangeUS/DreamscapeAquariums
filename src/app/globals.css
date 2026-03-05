@@ -2,7 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  @apply bg-black text-white;
+/* Custom global styles */
+html, body {
+  min-height: 100%;
+}
+
+/* Animated reef background */
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+.bg-reef {
+  background: linear-gradient(180deg, #0e3d4a 0%, #2c5364 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-reef::before,
+.bg-reef::after {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+  animation: float 8s infinite ease-in-out;
+}
+
+.bg-reef::after {
+  animation-duration: 12s;
+  animation-delay: -4s;
 }
