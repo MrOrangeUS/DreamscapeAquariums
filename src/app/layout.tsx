@@ -1,33 +1,19 @@
-/*
- * Root layout for the Dreamscape Aquariums website.
- *
- * This file defines the HTML structure for all pages in the app and
- * applies global styles. We import the global Tailwind CSS file here so
- * that utility classes are available throughout the site. The body
- * element applies a dark background and white text to provide good
- * contrast for the hero video and coral cards.
- */
+import './globals.css';
+import { ReactNode } from 'react';
+import Navbar from '../components/Navbar';
 
-import type { Metadata } from 'next'
-import './globals.css'
-
-// Basic metadata for the site. You can extend this with OpenGraph
-// properties or other SEO tags as needed.
-export const metadata: Metadata = {
+export const metadata = {
   title: 'Dreamscape Aquariums',
-  description: 'Experience vibrant corals from Dreamscape Aquariums delivered straight to your door.',
-}
+  description: 'Immersive reef and coral shop',
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-black text-white antialiased overflow-x-hidden">
+      <body className="bg-gray-50 text-gray-900 bg-reef">
+        <Navbar />
         {children}
       </body>
     </html>
-  )
+  );
 }
