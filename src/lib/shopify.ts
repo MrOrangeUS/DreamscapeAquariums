@@ -7,8 +7,8 @@ export interface Product {
   image: string;
 }
 
-const domain = process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN;
-const token = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+const domain = process.env.SHOPIFY_STORE_DOMAIN;
+const token = process.process.env.SHOPIFY_STOREFRONT_TOKEN;;
 
 async function storefront(query: string, variables: any = {}) {
   if (!domain || !token) {
