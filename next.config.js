@@ -6,10 +6,7 @@ const nextConfig = {
       'cdn.shopify.com',
       'dreamscape-aquariums.myshopify.com'
     ],
-  },
-  experimental: {
-    appDir: true,
-  },
+  }
 }
-
+}
 module.exports = nextConfig
