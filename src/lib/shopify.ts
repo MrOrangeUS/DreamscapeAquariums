@@ -12,7 +12,8 @@ const token = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
 
 async function storefront(query: string, variables: any = {}) {
   if (!domain || !token) {
-    throw new Error('Missing Shopify domain or access token');
+hcnsole.warn('Missing Shopify domain or access token');
+    return {};
   }
   const url = `https://${domain}/api/2023-07/graphql.json`;
   const res = await fetch(url, {
