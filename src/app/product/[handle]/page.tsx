@@ -21,7 +21,10 @@ export default async function ProductPage({ params }: Props) {
       </main>
     );
   }
-  const domain = process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN;
+  // Construct the Shopify product URL on the server. We avoid exposing the
+  // storefront domain via NEXT_PUBLIC_* variables to keep configuration
+  // server‑side only. Use the server environment variable instead.
+  const domain = process.env.SHOPIFY_STORE_DOMAIN;
   const shopifyUrl = domain ? `https://${domain}/products/${product.handle}` : '#';
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">

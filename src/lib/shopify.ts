@@ -8,7 +8,12 @@ export interface Product {
 }
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN;
-const token = process.process.env.SHOPIFY_STOREFRONT_TOKEN;;
+    // Retrieve the Shopify Storefront access token from the environment. Using
+    // `process.env` directly instead of `process.process.env` avoids a runtime
+    // error and ensures the value is pulled from the Node.js process
+    // environment. Do not prefix this variable with `NEXT_PUBLIC_` since
+    // storefront credentials should remain on the server.
+    const token = process.env.SHOPIFY_STOREFRONT_TOKEN;
 
 async function storefront(query: string, variables: any = {}) {
   if (!domain || !token) {
@@ -24,6 +29,13 @@ async function storefront(query: string, variables: any = {}) {
       'X-Shopify-Storefront-Access-Token': token as string,
     },
     body: JSON.stringify({ query, variables }),
+    // Next.js uses the `next` option to configure ISR (incremental static
+    // regeneration). TypeScript's RequestInit definition does not include
+    // this field, so we ignore the type error here. Without this option,
+    // every request would revalidate the data on each call, which is not
+    // desirable. The ignore directive allows the code to compile while
+    // still enabling caching.
+    // @ts-ignore
     next: { revalidate: 60 },
   });
   const json = await res.json();

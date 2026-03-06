@@ -1,5 +1,9 @@
 import CoralCard from '../CoralCard'
-import { getProductsFromCollection } from '../../lib/shopify'
+// Import the helper using the correct exported name. The shopify helper
+// exposes `getProductsByCollection`, not `getProductsFromCollection`. Using
+// the wrong import will cause a runtime error when this server component
+// attempts to fetch products.
+import { getProductsByCollection } from '../../lib/shopify'
 
 /**
  * NewDrops fetches products from the "new-arrivals-sorted-newest-first"
@@ -13,7 +17,7 @@ export default async function NewDrops() {
   // Fetch up to three products from the specified collection. The helper
   // pulls data from the Shopify Storefront API using server-side
   // environment variables. See `src/lib/shopify.ts` for details.
-  const products = await getProductsFromCollection(
+  const products = await getProductsByCollection(
     'new-arrivals-sorted-newest-first'
   )
   // Log the products to the server console for debugging purposes. This

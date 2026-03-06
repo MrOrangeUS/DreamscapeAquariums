@@ -1,5 +1,7 @@
 "use client";
 
+import React from 'react';
+
 const Hero: React.FC = () => (
   <section className="relative h-screen">
     <video autoPlay muted loop className="absolute inset-0 w-full h-full object-cover">
