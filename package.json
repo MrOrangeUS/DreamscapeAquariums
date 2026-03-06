@@ -31,7 +31,8 @@
     "skia-canvas": "^3.0.6",
     "tailwindcss": "^4.1.10",
     "ts-node": "10.9.2",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "framer-motion": "^11.3.19"
   },
   "devDependencies": {
     "@types/node": "20.10.5",

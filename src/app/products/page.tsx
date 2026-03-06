@@ -1,17 +1,16 @@
-import { getProductsByCollection } from '../../lib/shopify';
-import ProductGrid from '../../components/ProductGrid';
+﻿import { getProductsByCollection } from "../../lib/shopify";
+import ProductGrid from "../../components/ProductGrid";
 
 export const metadata = {
-  title: 'Products - Dreamscape Aquariums',
-  description: 'All products available in our store.',
+  title: "Corals | Dreamscape Aquariums",
 };
 
 export default async function ProductsPage() {
-  // Use 'all' collection handle or update to your specific collection.
-  const products = await getProductsByCollection('all');
+  const products = await getProductsByCollection("new-arrivals");
+
   return (
-    <main className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold mb-8">All Products</h1>
+    <main className="mx-auto max-w-7xl px-6 py-12">
+      <h1 className="mb-8 text-4xl font-semibold text-[#eafcff]">Coral Gallery</h1>
       <ProductGrid products={products} />
     </main>
   );

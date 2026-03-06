@@ -1,61 +1,67 @@
-export interface Product {
+﻿export interface Product {
   id: string;
   title: string;
   handle: string;
   description: string;
-  price: string;
   image: string;
+  price: string;
 }
 
-const domain = process.env.SHOPIFY_STORE_DOMAIN;
-    // Retrieve the Shopify Storefront access token from the environment. Using
-    // `process.env` directly instead of `process.process.env` avoids a runtime
-    // error and ensures the value is pulled from the Node.js process
-    // environment. Do not prefix this variable with `NEXT_PUBLIC_` since
-    // storefront credentials should remain on the server.
-    const token = process.env.SHOPIFY_STOREFRONT_TOKEN;
+const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
+const SHOPIFY_STOREFRONT_TOKEN = process.env.SHOPIFY_STOREFRONT_TOKEN;
 
-async function storefront(query: string, variables: any = {}) {
-  if (!domain || !token) {
-
-        console.warn('Missing Shopify domain or access token');
-    return {};
+async function storefrontFetch<T>(query: string, variables?: Record<string, unknown>): Promise<T | null> {
+  if (!SHOPIFY_STORE_DOMAIN || !SHOPIFY_STOREFRONT_TOKEN) {
+    console.warn("Shopify env vars are missing. Returning empty data.");
+    return null;
   }
-  const url = `https://${domain}/api/2023-07/graphql.json`;
-  const res = await fetch(url, {
-    method: 'POST',
+
+  const response = await fetch(`https://${SHOPIFY_STORE_DOMAIN}/api/2023-07/graphql.json`, {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': token as string,
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
     },
     body: JSON.stringify({ query, variables }),
-    // Next.js uses the `next` option to configure ISR (incremental static
-    // regeneration). TypeScript's RequestInit definition does not include
-    // this field, so we ignore the type error here. Without this option,
-    // every request would revalidate the data on each call, which is not
-    // desirable. The ignore directive allows the code to compile while
-    // still enabling caching.
-    // @ts-ignore
     next: { revalidate: 60 },
   });
-  const json = await res.json();
-  if (json.errors) {
-    throw new Error(JSON.stringify(json.errors));
+
+  if (!response.ok) {
+    throw new Error(`Shopify request failed: ${response.status} ${response.statusText}`);
   }
-  return json.data;
+
+  const payload = await response.json();
+
+  if (payload.errors?.length) {
+    throw new Error(payload.errors.map((error: { message: string }) => error.message).join(", "));
+  }
+
+  return payload.data as T;
 }
 
-/**
- * Fetch products from a given collection handle.
- * @param collectionHandle The Shopify collection handle (e.g. 'new-arrivals').
- */
+function formatProduct(node: any): Product {
+  const amount = Number(node?.priceRangeV2?.minVariantPrice?.amount ?? 0);
+  const currencyCode = node?.priceRangeV2?.minVariantPrice?.currencyCode ?? "USD";
+
+  return {
+    id: node.id,
+    title: node.title,
+    handle: node.handle,
+    description: node.description || "",
+    image: node?.images?.edges?.[0]?.node?.url || "",
+    price: new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currencyCode,
+      maximumFractionDigits: 2,
+    }).format(amount),
+  };
+}
+
 export async function getProductsByCollection(collectionHandle: string): Promise<Product[]> {
   const query = `
-    query getProducts($handle: String!) {
+    query GetProductsByCollection($handle: String!) {
       collectionByHandle(handle: $handle) {
-        id
-        title
-        products(first: 20) {
+        products(first: 24) {
           edges {
             node {
               id
@@ -66,7 +72,6 @@ export async function getProductsByCollection(collectionHandle: string): Promise
                 edges {
                   node {
                     url
-                    altText
                   }
                 }
               }
@@ -82,30 +87,24 @@ export async function getProductsByCollection(collectionHandle: string): Promise
       }
     }
   `;
-  const data = await storefront(query, { handle: collectionHandle });
-  const edges = data?.collectionByHandle?.products?.edges || [];
-  return edges.map(({ node }: any) => {
-    const imageNode = node.images?.edges?.[0]?.node;
-    const image = imageNode ? imageNode.url : '';
-    const price = `${node.priceRangeV2.minVariantPrice.amount} ${node.priceRangeV2.minVariantPrice.currencyCode}`;
-    return {
-      id: node.id,
-      title: node.title,
-      handle: node.handle,
-      description: node.description,
-      price,
-      image,
-    } as Product;
-  });
+
+  type Data = {
+    collectionByHandle?: {
+      products?: {
+        edges?: Array<{ node: any }>;
+      };
+    };
+  };
+
+  const data = await storefrontFetch<Data>(query, { handle: collectionHandle });
+  const edges = data?.collectionByHandle?.products?.edges ?? [];
+
+  return edges.map((edge) => formatProduct(edge.node));
 }
 
-/**
- * Fetch a single product by its handle from Shopify. Returns null if not found.
- * @param handle The product handle
- */
 export async function getProductByHandle(handle: string): Promise<Product | null> {
   const query = `
-    query getProduct($handle: String!) {
+    query GetProductByHandle($handle: String!) {
       productByHandle(handle: $handle) {
         id
         title
@@ -115,7 +114,6 @@ export async function getProductByHandle(handle: string): Promise<Product | null
           edges {
             node {
               url
-              altText
             }
           }
         }
@@ -128,18 +126,16 @@ export async function getProductByHandle(handle: string): Promise<Product | null
       }
     }
   `;
-  const data = await storefront(query, { handle });
-  const product = data?.productByHandle;
-  if (!product) return null;
-  const imageNode = product.images?.edges?.[0]?.node;
-  const image = imageNode ? imageNode.url : '';
-  const price = `${product.priceRangeV2.minVariantPrice.amount} ${product.priceRangeV2.minVariantPrice.currencyCode}`;
-  return {
-    id: product.id,
-    title: product.title,
-    handle: product.handle,
-    description: product.description,
-    price,
-    image,
-  } as Product;
+
+  type Data = {
+    productByHandle?: any;
+  };
+
+  const data = await storefrontFetch<Data>(query, { handle });
+
+  if (!data?.productByHandle) {
+    return null;
+  }
+
+  return formatProduct(data.productByHandle);
 }

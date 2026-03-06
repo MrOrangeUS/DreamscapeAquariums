@@ -1,18 +1,20 @@
-import './globals.css';
-import { ReactNode } from 'react';
-import Navbar from '../components/Navbar';
+﻿import type { Metadata } from "next";
+import "./globals.css";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
-export const metadata = {
-  title: 'Dreamscape Aquariums',
-  description: 'Immersive reef and coral shop',
+export const metadata: Metadata = {
+  title: "Dreamscape Aquariums",
+  description: "Luxury headless Shopify storefront for coral collectors.",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 text-gray-900 bg-reef">
+      <body>
         <Navbar />
-        {children}
+        <div className="relative pt-20">{children}</div>
+        <Footer />
       </body>
     </html>
   );

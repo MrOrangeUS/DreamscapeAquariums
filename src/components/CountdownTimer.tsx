@@ -1,58 +1,42 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-interface TimeRemaining {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
+function getTimeParts(targetDate: string) {
+  const target = new Date(targetDate).getTime();
+  const now = Date.now();
+  const diff = Math.max(0, target - now);
 
-function calculateTimeRemaining(targetDate: Date): TimeRemaining {
-  const totalMilliseconds = targetDate.getTime() - new Date().getTime();
-  const totalSeconds = Math.max(0, Math.floor(totalMilliseconds / 1000));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
 
-  return {
-    days: Math.floor(totalSeconds / (3600 * 24)),
-    hours: Math.floor((totalSeconds % (3600 * 24)) / 3600),
-    minutes: Math.floor((totalSeconds % 3600) / 60),
-    seconds: Math.floor(totalSeconds % 60),
-  };
+  return { days, hours, minutes, seconds };
 }
 
 export default function CountdownTimer({ targetDate }: { targetDate: string }) {
-  const [timeRemaining, setTimeRemaining] = useState(
-    calculateTimeRemaining(new Date(targetDate))
-  );
+  const fallbackDate = useMemo(() => targetDate || new Date(Date.now() + 86400000).toISOString(), [targetDate]);
+  const [time, setTime] = useState(() => getTimeParts(fallbackDate));
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeRemaining(calculateTimeRemaining(new Date(targetDate)));
-    }, 1000);
+    const timer = setInterval(() => setTime(getTimeParts(fallbackDate)), 1000);
     return () => clearInterval(timer);
-  }, [targetDate]);
+  }, [fallbackDate]);
 
   const items = [
-    { label: "Days", value: timeRemaining.days },
-    { label: "Hours", value: timeRemaining.hours },
-    { label: "Minutes", value: timeRemaining.minutes },
-    { label: "Seconds", value: timeRemaining.seconds },
+    { label: "Days", value: time.days },
+    { label: "Hours", value: time.hours },
+    { label: "Minutes", value: time.minutes },
+    { label: "Seconds", value: time.seconds },
   ];
 
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
       {items.map((item) => (
-        <div
-          key={item.label}
-          className="rounded-2xl border border-white/10 bg-black/20 p-6 text-center shadow-[0_0_30px_rgba(17,181,201,0.06)]"
-        >
-          <div className="text-3xl font-semibold text-white md:text-5xl">
-            {String(item.value).padStart(2, "0")}
-          </div>
-          <div className="mt-2 text-xs uppercase tracking-[0.3em] text-cyan-200/70">
-            {item.label}
-          </div>
+        <div key={item.label} className="ocean-panel rounded-2xl p-5 text-center shadow-[0_0_25px_rgba(17,181,201,.15)]">
+          <div className="text-4xl font-semibold text-[#eafcff] md:text-5xl">{String(item.value).padStart(2, "0")}</div>
+          <div className="mt-2 text-xs uppercase tracking-[0.28em] text-[#11b5c9]">{item.label}</div>
         </div>
       ))}
     </div>

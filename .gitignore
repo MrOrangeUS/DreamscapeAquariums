@@ -1,0 +1,14 @@
+﻿node_modules
+.next
+out
+dist
+coverage
+.vercel
+.env
+.env.local
+.env.*.local
+*.log
+*.zip
+*.tar
+*.rar
+.DS_Store
