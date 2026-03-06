@@ -1,13 +1,8 @@
 ﻿import { getProductsByCollection } from "../../lib/shopify";
 import ProductGrid from "../../components/ProductGrid";
 
-export const metadata = {
-  title: "Corals | Dreamscape Aquariums",
-};
-
 export default async function ProductsPage() {
   const products = await getProductsByCollection("new-arrivals");
-
   return (
     <main className="mx-auto max-w-7xl px-6 py-12">
       <h1 className="mb-8 text-4xl font-semibold text-[#eafcff]">Coral Gallery</h1>
