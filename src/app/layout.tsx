@@ -1,21 +1,22 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Dreamscape Aquariums",
-  description: "Luxury headless Shopify storefront for coral collectors.",
+  title: "Dreamscape Aquariums | Coral Drops",
+  description: "Live WYSIWYG coral drops synced from Shopify.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
-      <body>
-        <Navbar />
-        <div className="relative pt-20">{children}</div>
-        <Footer />
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
