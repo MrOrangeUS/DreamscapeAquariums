@@ -1,36 +1,22 @@
 @import "tailwindcss";
 
-/* Custom global styles */
-html, body {
-  min-height: 100%;
+:root {
+  color-scheme: dark;
 }
 
-/* Animated reef background */
-@keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
+html {
+  scroll-behavior: smooth;
 }
 
-.bg-reef {
-  background: linear-gradient(180deg, #0e3d4a 0%, #2c5364 100%);
-  position: relative;
-  overflow: hidden;
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top, rgba(17, 181, 201, 0.12), transparent 30%),
+    linear-gradient(180deg, #06101c 0%, #07111f 50%, #081522 100%);
+  color: #eafcff;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.bg-reef::before,
-.bg-reef::after {
-  content: '';
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  top: -50%;
-  left: -50%;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
-  animation: float 8s infinite ease-in-out;
-}
-
-.bg-reef::after {
-  animation-duration: 12s;
-  animation-delay: -4s;
+* {
+  box-sizing: border-box;
 }

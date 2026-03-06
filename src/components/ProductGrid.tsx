@@ -1,5 +1,4 @@
-import React from 'react';
-import ProductCard from './ProductCard';
+import ProductCard from "./ProductCard";
 
 interface Product {
   id: string;
@@ -10,16 +9,12 @@ interface Product {
   image: string;
 }
 
-interface ProductGridProps {
-  products: Product[];
+export default function ProductGrid({ products }: { products: Product[] }) {
+  return (
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
 }
-
-const ProductGrid: React.FC<ProductGridProps> = ({ products }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-    {products.map((product) => (
-      <ProductCard key={product.id} product={product} />
-    ))}
-  </div>
-);
-
-export default ProductGrid;
