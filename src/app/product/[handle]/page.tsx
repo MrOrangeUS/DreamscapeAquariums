@@ -1,27 +1,30 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
-import { getProductByHandle } from "../../../lib/shopify";
+import { notFound } from "next/navigation";
+import { getProductByHandle } from "@/lib/shopify";
 
-interface Props { params: { handle: string } }
+export const revalidate = 60;
 
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage({ params }: { params: { handle: string } }) {
   const product = await getProductByHandle(params.handle);
-  if (!product) return <main className="mx-auto max-w-5xl px-6 py-16 text-[#eafcff]">Product not found.</main>;
+  if (!product) notFound();
 
-  const domain = process.env.SHOPIFY_STORE_DOMAIN;
-  const buyUrl = domain ? `https://${domain}/products/${product.handle}` : "#";
+  const buyUrl = "#";
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="grid gap-10 md:grid-cols-2">
-        <div className="relative min-h-[420px] overflow-hidden rounded-3xl border border-white/10">
-          <Image src={product.image} alt={product.title} fill className="object-cover" />
+        <div className="relative min-h-[460px] overflow-hidden rounded-3xl border border-[#11b5c9]/25 bg-[#0c1b2e]/60">
+          <Image src={product.image || "/reef-placeholder.svg"} alt={product.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
         </div>
-        <div className="ocean-panel rounded-3xl p-8">
-          <h1 className="text-4xl font-semibold text-[#eafcff]">{product.title}</h1>
-          <p className="mt-4 text-[#eafcff]/70">{product.description}</p>
-          <p className="mt-8 text-2xl font-medium text-[#11b5c9]">{product.price}</p>
-          <Link href={buyUrl} target="_blank" className="mt-8 inline-flex rounded-full border border-[#11b5c9]/40 bg-[#11b5c9]/15 px-6 py-3 text-sm font-semibold text-[#eafcff] transition hover:bg-[#11b5c9]/30">Buy on Shopify</Link>
+
+        <div className="glass-panel rounded-3xl p-8">
+          <h1 className="text-4xl font-semibold">{product.title}</h1>
+          <p className="mt-5 leading-relaxed text-[#eafcff]/85">{product.description}</p>
+          <p className="mt-8 text-2xl font-semibold text-[#11b5c9]">{product.price}</p>
+          <Link href={buyUrl} target="_blank" className="mt-8 inline-flex rounded-full bg-[#ff7f9f] px-6 py-3 font-semibold text-[#07111f] hover:brightness-110">
+            Buy on Shopify
+          </Link>
         </div>
       </div>
     </main>

@@ -1,3 +1,8 @@
-﻿export default function CoralGlow() {
-  return <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,127,159,.18),transparent_40%),radial-gradient(circle_at_80%_20%,rgba(17,181,201,.2),transparent_45%)]" />;
+export default function CoralGlow() {
+  return (
+    <div className="pointer-events-none absolute inset-0">
+      <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-[#11b5c9]/20 blur-3xl" />
+      <div className="absolute right-0 top-32 h-72 w-72 rounded-full bg-[#ff7f9f]/12 blur-3xl" />
+    </div>
+  );
 }

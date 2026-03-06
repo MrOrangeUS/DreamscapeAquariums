@@ -1,9 +1,11 @@
-﻿"use client";
+"use client";
+
 import { useEffect, useMemo, useState } from "react";
 
-function getTimeParts(targetDate: string) {
+function getCountdown(targetDate: string) {
   const target = new Date(targetDate).getTime();
   const diff = Math.max(0, target - Date.now());
+
   return {
     days: Math.floor(diff / (1000 * 60 * 60 * 24)),
     hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
@@ -12,18 +14,51 @@ function getTimeParts(targetDate: string) {
   };
 }
 
-export default function CountdownTimer({ targetDate }: { targetDate: string }) {
-  const fallback = useMemo(() => targetDate || new Date(Date.now() + 86400000).toISOString(), [targetDate]);
-  const [time, setTime] = useState(() => getTimeParts(fallback));
-  useEffect(() => { const t = setInterval(() => setTime(getTimeParts(fallback)), 1000); return () => clearInterval(t); }, [fallback]);
+const ZERO_TIME = { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
-  const items = [{ label: "Days", value: time.days }, { label: "Hours", value: time.hours }, { label: "Minutes", value: time.minutes }, { label: "Seconds", value: time.seconds }];
+export default function CountdownTimer({ targetDate }: { targetDate: string }) {
+  const resolvedTarget = useMemo(
+    () => targetDate || new Date(Date.now() + 86400000).toISOString(),
+    [targetDate],
+  );
+
+  // Start from a stable server/client value to prevent hydration mismatch.
+  const [time, setTime] = useState(ZERO_TIME);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setTime(getCountdown(resolvedTarget));
+
+    const interval = setInterval(() => {
+      setTime(getCountdown(resolvedTarget));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [resolvedTarget]);
+
+  const safeTime = mounted ? time : ZERO_TIME;
+
+  const cells = [
+    { label: "Days", value: safeTime.days },
+    { label: "Hours", value: safeTime.hours },
+    { label: "Minutes", value: safeTime.minutes },
+    { label: "Seconds", value: safeTime.seconds },
+  ];
+
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-      {items.map((item) => (
-        <div key={item.label} className="ocean-panel rounded-2xl p-5 text-center shadow-[0_0_25px_rgba(17,181,201,.15)]">
-          <div className="text-4xl font-semibold text-[#eafcff] md:text-5xl">{String(item.value).padStart(2, "0")}</div>
-          <div className="mt-2 text-xs uppercase tracking-[0.28em] text-[#11b5c9]">{item.label}</div>
+      {cells.map((cell) => (
+        <div
+          key={cell.label}
+          className="rounded-2xl border border-[#11b5c9]/30 bg-[#0c1b2e]/70 p-5 text-center shadow-[0_0_30px_rgba(17,181,201,0.14)]"
+        >
+          <p className="text-4xl font-semibold md:text-5xl">
+            {String(cell.value).padStart(2, "0")}
+          </p>
+          <p className="mt-2 text-xs uppercase tracking-[0.25em] text-[#11b5c9]">
+            {cell.label}
+          </p>
         </div>
       ))}
     </div>

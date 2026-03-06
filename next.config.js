@@ -1,8 +1,12 @@
-﻿/** @type {import('next').NextConfig} */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  outputFileTracing: false,
   images: {
-    domains: ["cdn.shopify.com", "dreamscape-aquariums.myshopify.com"],
+    remotePatterns: [
+      { protocol: "https", hostname: "cdn.shopify.com" },
+      { protocol: "https", hostname: "dreamscape-aquariums.myshopify.com" },
+    ],
   },
 };
 

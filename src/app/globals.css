@@ -1,49 +1,24 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+:root {
+  --deep-ocean: #07111f;
+  --reef-blue: #0c1b2e;
+  --aqua-glow: #11b5c9;
+  --coral-pink: #ff7f9f;
+  --pearl-white: #eafcff;
+}
 
 body {
-  background: #020617;
+  min-height: 100vh;
+  color: var(--pearl-white);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(17, 181, 201, 0.14), transparent 40%),
+    radial-gradient(circle at 85% 15%, rgba(255, 127, 159, 0.09), transparent 35%),
+    linear-gradient(160deg, var(--reef-blue) 0%, var(--deep-ocean) 60%, #040b15 100%);
 }
 
-.reef-glow {
-  background: radial-gradient(circle at 50% 20%, rgba(34, 211, 238, 0.22), transparent 40%),
-    radial-gradient(circle at 20% 70%, rgba(59, 130, 246, 0.15), transparent 45%);
-}
-
-.bubble-layer {
-  background-image: radial-gradient(rgba(186, 230, 253, 0.2) 1px, transparent 1px);
-  background-size: 28px 28px;
-  animation: bubbles 16s linear infinite;
-  opacity: 0.25;
-}
-
-.caustics {
-  background: repeating-linear-gradient(
-    110deg,
-    rgba(125, 211, 252, 0.03) 0,
-    rgba(125, 211, 252, 0.14) 12%,
-    rgba(125, 211, 252, 0.03) 24%
-  );
-  mix-blend-mode: screen;
-  animation: caustics 10s ease-in-out infinite alternate;
-  opacity: 0.35;
-}
-
-@keyframes bubbles {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-28px);
-  }
-}
-
-@keyframes caustics {
-  from {
-    transform: translateX(-2%);
-  }
-  to {
-    transform: translateX(2%);
-  }
+.glass-panel {
+  border: 1px solid rgba(17, 181, 201, 0.25);
+  background: linear-gradient(180deg, rgba(12, 27, 46, 0.8), rgba(7, 17, 31, 0.9));
+  backdrop-filter: blur(10px);
 }
