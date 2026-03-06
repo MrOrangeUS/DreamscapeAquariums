@@ -12,12 +12,10 @@ export default async function HomePage() {
     <main className="relative overflow-hidden">
       <CoralGlow />
       <Hero />
-
       <section className="relative mx-auto max-w-7xl px-6 py-16">
         <h2 className="mb-5 text-center text-3xl font-semibold text-[#eafcff] md:text-5xl">Next Coral Drop</h2>
         <CountdownTimer targetDate={targetDate} />
       </section>
-
       <section className="mx-auto max-w-7xl px-6 pb-16">
         <div className="mb-8 flex items-end justify-between gap-4">
           <h2 className="text-3xl font-semibold text-[#eafcff] md:text-5xl">New Arrivals</h2>

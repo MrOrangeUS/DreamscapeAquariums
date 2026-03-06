@@ -1,36 +1,23 @@
 ﻿"use client";
-
 import { useEffect, useMemo, useState } from "react";
 
 function getTimeParts(targetDate: string) {
   const target = new Date(targetDate).getTime();
-  const now = Date.now();
-  const diff = Math.max(0, target - now);
-
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((diff / (1000 * 60)) % 60);
-  const seconds = Math.floor((diff / 1000) % 60);
-
-  return { days, hours, minutes, seconds };
+  const diff = Math.max(0, target - Date.now());
+  return {
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((diff / (1000 * 60)) % 60),
+    seconds: Math.floor((diff / 1000) % 60),
+  };
 }
 
 export default function CountdownTimer({ targetDate }: { targetDate: string }) {
-  const fallbackDate = useMemo(() => targetDate || new Date(Date.now() + 86400000).toISOString(), [targetDate]);
-  const [time, setTime] = useState(() => getTimeParts(fallbackDate));
+  const fallback = useMemo(() => targetDate || new Date(Date.now() + 86400000).toISOString(), [targetDate]);
+  const [time, setTime] = useState(() => getTimeParts(fallback));
+  useEffect(() => { const t = setInterval(() => setTime(getTimeParts(fallback)), 1000); return () => clearInterval(t); }, [fallback]);
 
-  useEffect(() => {
-    const timer = setInterval(() => setTime(getTimeParts(fallbackDate)), 1000);
-    return () => clearInterval(timer);
-  }, [fallbackDate]);
-
-  const items = [
-    { label: "Days", value: time.days },
-    { label: "Hours", value: time.hours },
-    { label: "Minutes", value: time.minutes },
-    { label: "Seconds", value: time.seconds },
-  ];
-
+  const items = [{ label: "Days", value: time.days }, { label: "Hours", value: time.hours }, { label: "Minutes", value: time.minutes }, { label: "Seconds", value: time.seconds }];
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
       {items.map((item) => (
